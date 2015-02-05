@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="main_activity_color">#333399</color>
+    <color name="default_screen_bg">#f9f9f9</color>
+    <color name="rounded_container_bg">#FFFFFF</color>
+    <color name="rounded_container_border">#FFFFFF</color>
+    <color name="light_gray_header_color">#646663</color>
+    <color name="progress_color">#00d190</color>
+    <color name="progress_color2">#333399</color>
+
+</resources> 
