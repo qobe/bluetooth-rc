@@ -25,6 +25,7 @@ public class BluetoothMedian {
     public BluetoothMedian(BluetoothAdapter ba, Handler h){
         mBlueAdapter = ba;
         mMainHandler = h;
+        mState = Constants.BLUETOOTH_DISCONNECTED;
         mPairedDevices = new ArrayList<BluetoothDevice>();
         for(BluetoothDevice dev : mBlueAdapter.getBondedDevices()){
             mPairedDevices.add(dev);
@@ -46,11 +47,10 @@ public class BluetoothMedian {
         mMainHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, mState, -1).sendToTarget();
     }
 
-    public void open(BluetoothDevice dev){
+    public synchronized void open(BluetoothDevice dev){
         mBlueAdapter.cancelDiscovery();
         mConnectThread =  new ConnectThread(dev);
         mConnectThread.start();
-        setState(Constants.BLUETOOTH_CONNECTED);
     }
 
     public void send(String data) {
@@ -62,9 +62,10 @@ public class BluetoothMedian {
         }
         mConnectThread.write(msg);
     }
-    public void cancel(){
-        mConnectThread.close();
-        setState(Constants.BLUETOOTH_DISCONNECTED);
+    public synchronized void cancel(){
+        if(mConnectThread != null){
+            mConnectThread.close();
+        }
     }
 
 
@@ -89,6 +90,7 @@ public class BluetoothMedian {
                 tmp = dev.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
                 tmpOut = tmp.getOutputStream();
                 tmpIn = tmp.getInputStream();
+                setState(Constants.BLUETOOTH_CONNECTED);
             } catch (IOException e) { }
             mmSocket = tmp;
             mBlueOut = tmpOut;
@@ -114,6 +116,7 @@ public class BluetoothMedian {
         private void close(){
             try {
                 mmSocket.close();
+                setState(Constants.BLUETOOTH_DISCONNECTED);
             } catch (IOException e) {
                 e.printStackTrace();
             }

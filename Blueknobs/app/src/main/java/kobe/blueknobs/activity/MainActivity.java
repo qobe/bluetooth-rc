@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -16,30 +17,29 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import kobe.blueknobs.BluetoothMedian;
+import kobe.blueknobs.Constants;
 import kobe.blueknobs.R;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final int CONNECTION_STATE_CHANGED = 8701; //request code for activity result to check for dropped connection
+
     private BluetoothMedian mBlueMedian;
-    private Handler mBlueHandler;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mBlueMedian = new BluetoothMedian(BluetoothAdapter.getDefaultAdapter(), mBlueHandler);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-        //Intent monitorBluetoothConnection = new Intent(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-       // startActivityForResult(monitorBluetoothConnection, CONNECTION_STATE_CHANGED);
 
         //Enable Connect Button
         TextView cb = (TextView)findViewById(R.id.connectButton);
         cb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mBlueMedian.cancel(); //close any existing sockets
                 //check phone's bluetooth status
-                mBlueMedian = new BluetoothMedian(BluetoothAdapter.getDefaultAdapter(), mBlueHandler);
                 if(!mBlueMedian.isEnabled()){
                     Toast.makeText(MainActivity.this, "Please turn on bluetooth", Toast.LENGTH_LONG);
                 }
@@ -63,37 +63,27 @@ public class MainActivity extends ActionBarActivity {
                     }
                 });
                 popupMenu.show();
+                //initiate control seekbars
                 new RCController(mBlueMedian);
             }
         });
-        //initiate control seekbars
-
 
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode, resultCode, data);
-        if((resultCode == RESULT_OK) && (requestCode == CONNECTION_STATE_CHANGED)) {
-            //get extras
-            int state = data.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
-            TextView tv = (TextView)findViewById(R.id.connectButton);
-            switch (state){
-            //state connected: make button handler
-                case BluetoothAdapter.STATE_CONNECTED:
-                    tv.setTextColor(Color.GREEN);
-                    Toast.makeText(MainActivity.this, "Connected..", Toast.LENGTH_SHORT);
+    private final Handler mBlueHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            switch(msg.arg1){
+                case Constants.BLUETOOTH_CONNECTED:
+                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.GREEN);
                     break;
-            //state disconnected: make button clear
-                case BluetoothAdapter.STATE_DISCONNECTED:
-                    tv.setTextColor(Color.RED);
-                    Toast.makeText(MainActivity.this, "Disconnected..", Toast.LENGTH_SHORT);
+                case Constants.BLUETOOTH_DISCONNECTED:
+                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.WHITE);
                     break;
-                default: break;
             }
         }
-    }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,6 +111,14 @@ public class MainActivity extends ActionBarActivity {
     public void onStop(){
         super.onStop();
        // mBlueMedian.cancel();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(mBlueMedian != null){
+            mBlueMedian.cancel();
+        }
     }
 
 
