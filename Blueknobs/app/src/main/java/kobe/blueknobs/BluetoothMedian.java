@@ -34,10 +34,6 @@ public class BluetoothMedian {
 
     public ArrayList<BluetoothDevice> getPairedDevices(){  return mPairedDevices;  }
 
-    public boolean isEnabled(){
-        return mBlueAdapter.isEnabled();
-    }
-
     /**
      * uses handler to pass current bluetooth state to Main
      * @param state int defining current connection status
@@ -90,7 +86,6 @@ public class BluetoothMedian {
                 tmp = dev.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
                 tmpOut = tmp.getOutputStream();
                 tmpIn = tmp.getInputStream();
-                setState(Constants.BLUETOOTH_CONNECTED);
             } catch (IOException e) { }
             mmSocket = tmp;
             mBlueOut = tmpOut;
@@ -98,8 +93,10 @@ public class BluetoothMedian {
         }
 
         public void run(){
+            setState(Constants.BLUETOOTH_CONNECTING);
             try {
                 mmSocket.connect();
+                setState(Constants.BLUETOOTH_CONNECTED);
             } catch (IOException connectException) {
                 try {
                    mmSocket.close();

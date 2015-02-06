@@ -39,10 +39,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 mBlueMedian.cancel(); //close any existing sockets
-                //check phone's bluetooth status
-                if(!mBlueMedian.isEnabled()){
-                    Toast.makeText(MainActivity.this, "Please turn on bluetooth", Toast.LENGTH_LONG);
-                }
+
                 //Create popup menu for connection options, anchor it to connectbutton
                 PopupMenu popupMenu = new PopupMenu(MainActivity.this, v);
                 //populate popup menu with paired devices
@@ -77,6 +74,9 @@ public class MainActivity extends ActionBarActivity {
             switch(msg.arg1){
                 case Constants.BLUETOOTH_CONNECTED:
                     ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.GREEN);
+                    break;
+                case Constants.BLUETOOTH_CONNECTING:
+                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.MAGENTA);
                     break;
                 case Constants.BLUETOOTH_DISCONNECTED:
                     ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.WHITE);
