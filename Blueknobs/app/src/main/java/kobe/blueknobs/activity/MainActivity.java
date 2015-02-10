@@ -1,5 +1,6 @@
 package kobe.blueknobs.activity;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +22,7 @@ import kobe.blueknobs.BluetoothMedian;
 import kobe.blueknobs.Constants;
 import kobe.blueknobs.R;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
 
     private BluetoothMedian mBlueMedian;
@@ -39,7 +41,9 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 mBlueMedian.cancel(); //close any existing sockets
-
+                if(!BluetoothAdapter.getDefaultAdapter().isEnabled()){
+                    Toast.makeText(MainActivity.this, "Please enable bluetooth", Toast.LENGTH_LONG).show();
+                }
                 //Create popup menu for connection options, anchor it to connectbutton
                 PopupMenu popupMenu = new PopupMenu(MainActivity.this, v);
                 //populate popup menu with paired devices
@@ -73,13 +77,13 @@ public class MainActivity extends ActionBarActivity {
         public void handleMessage(Message msg){
             switch(msg.arg1){
                 case Constants.BLUETOOTH_CONNECTED:
-                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.GREEN);
+                    ((TextView)findViewById(R.id.connectButton)).setText("connected");
                     break;
                 case Constants.BLUETOOTH_CONNECTING:
-                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.MAGENTA);
+                    ((TextView)findViewById(R.id.connectButton)).setText("connecting..");
                     break;
                 case Constants.BLUETOOTH_DISCONNECTED:
-                    ((TextView)findViewById(R.id.connectButton)).setTextColor(Color.WHITE);
+                    ((TextView)findViewById(R.id.connectButton)).setText("disconnected");
                     break;
             }
         }

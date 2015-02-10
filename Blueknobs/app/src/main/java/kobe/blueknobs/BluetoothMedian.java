@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +26,7 @@ public class BluetoothMedian {
     public BluetoothMedian(BluetoothAdapter ba, Handler h){
         mBlueAdapter = ba;
         mMainHandler = h;
-        mState = Constants.BLUETOOTH_DISCONNECTED;
+        setState(Constants.BLUETOOTH_DISCONNECTED);
         mPairedDevices = new ArrayList<BluetoothDevice>();
         for(BluetoothDevice dev : mBlueAdapter.getBondedDevices()){
             mPairedDevices.add(dev);
@@ -107,7 +108,10 @@ public class BluetoothMedian {
         private void write(byte[] bytes){
             try {
                 mBlueOut.write(bytes);
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                Log.e("BLUETOOTH WRITE", "error writing", e);
+
+            }
         }
 
         private void close(){

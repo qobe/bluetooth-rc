@@ -23,6 +23,7 @@
         android:layout_width="255dp"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/steeringBar"
+        android:rotation="270"
         android:max="255"
         android:progress="0"
         android:progressDrawable="@drawable/sliderbar"
@@ -30,7 +31,7 @@
         android:layout_alignParentEnd="true" />
 
     <TextView
-        android:layout_width="100dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="@string/ConnectButton"
         android:textSize="20dp"
