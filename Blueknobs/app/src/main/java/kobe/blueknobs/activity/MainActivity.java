@@ -3,13 +3,9 @@ package kobe.blueknobs.activity;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +22,7 @@ public class MainActivity extends Activity {
 
 
     private BluetoothMedian mBlueMedian;
-
+    private RCController rcControls;
 
 
     @Override
@@ -34,6 +30,7 @@ public class MainActivity extends Activity {
         mBlueMedian = new BluetoothMedian(BluetoothAdapter.getDefaultAdapter(), mBlueHandler);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        rcControls = new RCController(mBlueMedian);
 
         //Enable Connect Button
         TextView cb = (TextView)findViewById(R.id.connectButton);
@@ -65,7 +62,6 @@ public class MainActivity extends Activity {
                 });
                 popupMenu.show();
                 //initiate control seekbars
-                new RCController(mBlueMedian);
             }
         });
 
@@ -112,17 +108,15 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onStop(){
-        super.onStop();
-       // mBlueMedian.cancel();
+    public void onPause(){
+        super.onPause();
+        rcControls.resetControls();
     }
 
     @Override
-    public void onDestroy(){
-        super.onDestroy();
-        if(mBlueMedian != null){
-            mBlueMedian.cancel();
-        }
+    public void onStop(){
+        super.onStop();
+        mBlueMedian.cancel();
     }
 
 
@@ -146,9 +140,11 @@ public class MainActivity extends Activity {
                     switch(seekBar.getId()){
                         case R.id.accelerateBar:
                             ((TextView)findViewById(R.id.throttleView)).setText("Load: "+Integer.toString(progress));
+                            if(!fromUser){accelerate(progress);}
                             break;
                         case R.id.steeringBar:
                             ((TextView)findViewById(R.id.steeringView)).setText("Angle: "+Integer.toString(progress - 30));
+                            if(!fromUser){turn(progress);}
                             break;
                         default: break;
                     }
@@ -171,6 +167,8 @@ public class MainActivity extends Activity {
             };
             throttle.setOnSeekBarChangeListener(sbl);
             steering.setOnSeekBarChangeListener(sbl);
+
+            resetControls();
         }
 
         private void turn(int angle){
@@ -180,6 +178,11 @@ public class MainActivity extends Activity {
 
         private void accelerate(int load){
             handler.send("A" + Integer.toString(load));
+        }
+
+        private void resetControls(){
+            throttle.setProgress(0);
+            steering.setProgress(steering.getMax()/2);
         }
     }
 }
